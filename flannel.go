@@ -62,9 +62,13 @@ type NetConf struct {
 
 type subnetEnv struct {
 	nw     *net.IPNet
+	nws    []*net.IPNet
 	sn     *net.IPNet
+	sns    []*net.IPNet
 	ip6Nw  *net.IPNet
+	ip6Nws []*net.IPNet
 	ip6Sn  *net.IPNet
+	ip6Sns []*net.IPNet
 	mtu    *uint
 	ipmasq *bool
 }
@@ -130,10 +134,28 @@ func loadFlannelSubnetEnv(fn string) (*subnetEnv, error) {
 				return nil, err
 			}
 
+		case "FLANNEL_NETWORKS":
+			cidrs := strings.Split(parts[1], ",")
+			for i := range cidrs {
+				_, se.nws[i], err = net.ParseCIDR(cidrs[i])
+				if err != nil {
+					return nil, err
+				}
+			}
+
 		case "FLANNEL_SUBNET":
 			_, se.sn, err = net.ParseCIDR(parts[1])
 			if err != nil {
 				return nil, err
+			}
+
+		case "FLANNEL_SUBNETS":
+			cidrs := strings.Split(parts[1], ",")
+			for i := range cidrs {
+				_, se.sns[i], err = net.ParseCIDR(cidrs[i])
+				if err != nil {
+					return nil, err
+				}
 			}
 
 		case "FLANNEL_IPV6_NETWORK":
@@ -142,10 +164,28 @@ func loadFlannelSubnetEnv(fn string) (*subnetEnv, error) {
 				return nil, err
 			}
 
+		case "FLANNEL_IPV6_NETWORKS":
+			cidrs := strings.Split(parts[1], ",")
+			for i := range cidrs {
+				_, se.ip6Nws[i], err = net.ParseCIDR(cidrs[i])
+				if err != nil {
+					return nil, err
+				}
+			}
+
 		case "FLANNEL_IPV6_SUBNET":
 			_, se.ip6Sn, err = net.ParseCIDR(parts[1])
 			if err != nil {
 				return nil, err
+			}
+
+		case "FLANNEL_IPV6_SUBNETS":
+			cidrs := strings.Split(parts[1], ",")
+			for i := range cidrs {
+				_, se.ip6Sns[i], err = net.ParseCIDR(cidrs[i])
+				if err != nil {
+					return nil, err
+				}
 			}
 
 		case "FLANNEL_MTU":
